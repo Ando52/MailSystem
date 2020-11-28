@@ -1,0 +1,12 @@
+The users that have been created
+email:poo@live.ca
+password: poo
+
+email: foo@hotmail.com
+password: foo
+
+email: bar@hotmail.com
+password: bar
+
+email: baz@hotmail.com
+password: baz

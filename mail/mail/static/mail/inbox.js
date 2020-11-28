@@ -6,8 +6,15 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+
   // By default, load the inbox
   load_mailbox('inbox');
+
+  //document.querySelector('#compose-submit').addEventListener('click', send_email);
+  // for when the user presses  
+  send_email();
+
+
 });
 
 function compose_email() {
@@ -30,4 +37,60 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Show the emails
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    console.log(emails)
+
+    // gets a list and calls add_email function to each email object
+  });
+}
+
+function send_email() {
+
+  document.querySelector('#compose-form').onsubmit = () =>{
+
+    //Gets all the data from the html
+    const msg = document.getElementById('compose-recipients');
+    
+    const recipients_in = document.getElementById('compose-recipients').value;
+    const subject_line = document.getElementById('compose-subject').value;
+    const body_in = document.getElementById('compose-body').value;
+    
+    // Post the email data to the server
+    fetch('/emails',{
+      method: 'POST',
+      body: JSON.stringify({
+        recipients: recipients_in,
+        subject: subject_line,
+        body: body_in
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status == 201){
+        load_mailbox('sent');
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
+  }
+  
+}    
+
+function add_email(content){
+
+  // Creates email
+  const email_element = document.createElement('div');
+  email_element.className = "email";
+  email_element.innerHTML = "this is an email";
+  email_element.addEventListener('click', function() {
+    console.log('This element has been clicked');
+  });
+
+  // Adding the email ot the DOM
+  document.querySelector('#emails-view').append(email_element);
 }
