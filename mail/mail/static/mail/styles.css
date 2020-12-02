@@ -1,3 +1,30 @@
 textarea {
     min-height: 400px;
 }
+
+.email{
+    border: 1px solid black;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+#sender{
+    display:inline-block;
+    margin: 5px 5px;
+}
+
+#subject-line{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display:inline-block;
+    font-size: 20px;
+}
+
+#timestamp{
+    position: absolute;
+    margin-top: 15px;
+    right:18vw;
+    display:inline-block;
+
+}

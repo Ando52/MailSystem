@@ -42,7 +42,9 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
-    console.log(emails)
+    for (i=0; i<emails.length; i++){
+      add_email(emails[i], mailbox);
+    }
 
     // gets a list and calls add_email function to each email object
   });
@@ -81,12 +83,22 @@ function send_email() {
   
 }    
 
-function add_email(content){
+function add_email(data, mailbox){
+  var sender = data.sender;
+  const recipients_len = data.recipients.length;
 
+  // Shows the people who the user sent the email to in the sent mailbox
+  if (mailbox == 'sent'){
+    sender = "To: " + data.recipients[0];
+    if (recipients_len > 1){
+      sender = sender + `(${recipients_len})`;
+    }
+  }
+  console.log(sender)
   // Creates email
   const email_element = document.createElement('div');
   email_element.className = "email";
-  email_element.innerHTML = "this is an email";
+  email_element.innerHTML = `<h4 id="sender">${sender}:</h4> <p id="subject-line">${data.subject}</p> <p id="timestamp">${data.timestamp}</p>`;
   email_element.addEventListener('click', function() {
     console.log('This element has been clicked');
   });
