@@ -94,15 +94,46 @@ function add_email(data, mailbox){
       sender = sender + `(${recipients_len})`;
     }
   }
+
   console.log(sender)
   // Creates email
   const email_element = document.createElement('div');
   email_element.className = "email";
   email_element.innerHTML = `<h4 id="sender">${sender}:</h4> <p id="subject-line">${data.subject}</p> <p id="timestamp">${data.timestamp}</p>`;
+  
   email_element.addEventListener('click', function() {
+
+    // When button is clicked and not looking at sent box it will mark email as read
+    if (!(mailbox == 'sent')){
+      put_read(data);
+    }
     console.log('This element has been clicked');
   });
+
+  // Changes background to grey if the email is put as read
+  if (data.read == true){
+    email_element.style.background = 'rgb(188,188,188)';
+  }
 
   // Adding the email ot the DOM
   document.querySelector('#emails-view').append(email_element);
 }
+
+function put_read(email){
+  fetch(`/emails/${email.id}`,{
+    method: 'PUT',
+    body: JSON.stringify({
+      read: true
+    })
+  })
+};
+
+function set_archive(email){
+  fetch(`/emails/${email.id}`,{
+    method: 'PUT',
+    body: JSON.stringify({
+      archive: true
+    })
+  })
+
+};
