@@ -26,5 +26,13 @@ textarea {
     margin-top: 15px;
     right:18vw;
     display:inline-block;
+}
 
+#email-label{
+    font-style: bold;
+    
+}
+
+#archive-button{
+    background: red;
 }

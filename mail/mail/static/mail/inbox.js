@@ -10,8 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // By default, load the inbox
   load_mailbox('inbox');
 
-  //document.querySelector('#compose-submit').addEventListener('click', send_email);
-  // for when the user presses  
+  // for when the user submits a form on the compose email page.
   send_email();
 
 
@@ -20,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function compose_email() {
 
   // Show compose view and hide other views
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
@@ -32,6 +32,7 @@ function compose_email() {
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
@@ -46,17 +47,78 @@ function load_mailbox(mailbox) {
       add_email(emails[i], mailbox);
     }
 
-    // gets a list and calls add_email function to each email object
   });
 }
 
+function show_email(data, mailbox){
+  // Hides the email list and displays the single email
+  document.getElementById('emails-view').style.display = 'none';
+  document.getElementById('email-view').style.display = 'block';
+
+  // Creates the div's needed to show the email
+  var email_view = document.querySelector('#email-view');
+  var email_head = document.createElement('div');
+  var email_body = document.createElement('div'); 
+  email_view.innerHTML = ""; 
+  email_body.innerHTML = "<hr>";
+  email_body.className = 'email-text';
+  email_head.className = 'email-body';
+
+  email_head.addEventListener("click", function(){
+  });
+
+  // If the emai is archived the button label will be changed.
+
+  // Get title data different display depending on the mailbox it was selected from (not yet rn)
+  email_body.innerHTML=`<p class="email-body"> ${data.body}</p>`;
+  
+  if (mailbox === 'inbox' || mailbox === 'archive'){
+    email_head.innerHTML = `<p><b>From:</b>${data.sender}</p>`
+
+    // Creates the logic and button
+    archive_btn = document.createElement('button');
+    archive_btn.className = "btn btn-outline-secondary";
+
+    archive_btn.addEventListener("click", function(){
+      toggle_archive(data);
+      if (archive_btn.innerText == 'Archive'){        
+        archive_btn.innerText = "Unarchive";
+      }else{
+        archive_btn.innerText = 'Archive';
+      };
+    });
+
+    if (data.archived === true){
+      archive_btn.innerText = "Unarchive";
+    }else{
+      archive_btn.innerText = "Archive";
+    }
+    email_body.append(archive_btn);
+
+
+  }else if(mailbox === 'sent'){
+    email_head.innerHTML = `<p><b>To:</b> ${data.recipients.join(', ')}</p>`;
+  }
+
+  email_head.innerHTML = email_head.innerHTML + `
+  <p><b>Subject:</b>${data.subject}</p>
+  <p><b>Timestamp:</b>${data.timestamp}</p>
+  <hr>`;
+
+
+
+
+  // Displays the html items to the div
+  email_view.append(email_head);
+  email_view.append(email_body);
+
+}
+
 function send_email() {
-
   document.querySelector('#compose-form').onsubmit = () =>{
-
+    
     //Gets all the data from the html
     const msg = document.getElementById('compose-recipients');
-    
     const recipients_in = document.getElementById('compose-recipients').value;
     const subject_line = document.getElementById('compose-subject').value;
     const body_in = document.getElementById('compose-body').value;
@@ -80,7 +142,6 @@ function send_email() {
       console.log(error);
     });
   }
-  
 }    
 
 function add_email(data, mailbox){
@@ -93,31 +154,27 @@ function add_email(data, mailbox){
     if (recipients_len > 1){
       sender = sender + `(${recipients_len})`;
     }
-  }
-
-  console.log(sender)
+  };
   // Creates email
-  const email_element = document.createElement('div');
+  var email_element = document.createElement('div');
   email_element.className = "email";
   email_element.innerHTML = `<h4 id="sender">${sender}:</h4> <p id="subject-line">${data.subject}</p> <p id="timestamp">${data.timestamp}</p>`;
-  
-  email_element.addEventListener('click', function() {
 
+  email_element.addEventListener('click', function() {
     // When button is clicked and not looking at sent box it will mark email as read
     if (!(mailbox == 'sent')){
       put_read(data);
     }
-    console.log('This element has been clicked');
+    show_email(data, mailbox);
   });
-
   // Changes background to grey if the email is put as read
   if (data.read == true){
     email_element.style.background = 'rgb(188,188,188)';
-  }
-
+  };
   // Adding the email ot the DOM
   document.querySelector('#emails-view').append(email_element);
 }
+
 
 function put_read(email){
   fetch(`/emails/${email.id}`,{
@@ -128,12 +185,17 @@ function put_read(email){
   })
 };
 
-function set_archive(email){
+
+function toggle_archive(email){
+  
+  // Makes it so that bool receives false when email.archive is true and vice versa
+  var bool = !(email.archived === true);
+
+  // Puts the result of bool away
   fetch(`/emails/${email.id}`,{
     method: 'PUT',
     body: JSON.stringify({
-      archive: true
+      archived: bool
     })
   })
-
 };
