@@ -61,39 +61,45 @@ function show_email(data, mailbox){
   var email_body = document.createElement('div'); 
   email_view.innerHTML = ""; 
   email_body.innerHTML = "<hr>";
-  email_body.className = 'email-text';
-  email_head.className = 'email-body';
+  email_body.className = 'email-body';
+  email_head.className = 'email-head';
 
-  email_head.addEventListener("click", function(){
-  });
-
-  // If the emai is archived the button label will be changed.
-
-  // Get title data different display depending on the mailbox it was selected from (not yet rn)
-  email_body.innerHTML=`<p class="email-body"> ${data.body}</p>`;
+  // Get title data different display depending on the mailbox
+  email_body.innerHTML=`<p class="email-text"> ${data.body.replace(/\r?\n/g,'<br>')
+        .replace(/^\s|\s(?=\s)/g, '&nbsp;')}</p>`;
   
   if (mailbox === 'inbox' || mailbox === 'archive'){
     email_head.innerHTML = `<p><b>From:</b>${data.sender}</p>`
 
-    // Creates the logic and button
+    // Creates the archive button and its logic
     archive_btn = document.createElement('button');
     archive_btn.className = "btn btn-outline-secondary";
 
     archive_btn.addEventListener("click", function(){
-      toggle_archive(data);
       if (archive_btn.innerText == 'Archive'){        
         archive_btn.innerText = "Unarchive";
       }else{
         archive_btn.innerText = 'Archive';
       };
+      toggle_archive(data);
     });
+
+    // Creates the reply button and its logic
+    reply_btn = document.createElement('button');
+    reply_btn.className = "btn btn-secondary";  
+    reply_btn.innerText = "Reply"      
+
+    reply_btn.addEventListener("click", function(){
+      console.log("Pressed reply");
+      compose_reply(data);
+    })
 
     if (data.archived === true){
       archive_btn.innerText = "Unarchive";
     }else{
       archive_btn.innerText = "Archive";
     }
-    email_body.append(archive_btn);
+    email_body.append(archive_btn, reply_btn);
 
 
   }else if(mailbox === 'sent'){
@@ -105,12 +111,8 @@ function show_email(data, mailbox){
   <p><b>Timestamp:</b>${data.timestamp}</p>
   <hr>`;
 
-
-
-
   // Displays the html items to the div
-  email_view.append(email_head);
-  email_view.append(email_body);
+  email_view.append(email_head, email_body);
 
 }
 
@@ -198,4 +200,23 @@ function toggle_archive(email){
       archived: bool
     })
   })
+  .then(response => {
+    load_mailbox('inbox');
+  })
 };
+
+function compose_reply(email){
+  compose_email();
+  subject_line = document.querySelector('#compose-subject');
+
+  if (!(email.subject.substring(0,3) == "Re:")){
+    subject_line.value = "Re: "
+  }
+  if (email.body === ""){
+    document.querySelector('#compose-body').value = `----On ${email.timestamp} ${email.sender} wrote you an empty email.----`;
+  }
+  document.querySelector('#compose-body').value = `----On ${email.timestamp} ${email.sender} wrote---- \n\n` + email.body; 
+  document.querySelector('#compose-recipients').value = email.sender;
+
+  subject_line.value = subject_line.value + email.subject;
+}

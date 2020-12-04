@@ -28,11 +28,6 @@ textarea {
     display:inline-block;
 }
 
-#email-label{
-    font-style: bold;
-    
-}
-
-#archive-button{
-    background: red;
+.email-text{
+    white-space: pre-line;
 }
